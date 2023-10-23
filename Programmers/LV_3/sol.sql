@@ -61,3 +61,51 @@ FROM BOOK B, BOOK_SALES S
 WHERE B.BOOK_ID = S.BOOK_ID AND DATE_FORMAT(S.SALES_DATE,'%Y-%m') = '2022-01'
 GROUP BY B.CATEGORY
 ORDER BY B.CATEGORY ASC
+
+-- 즐겨찾기가 가장 많은 식당 정보 출력하기
+-- 음식종류별로 즐겨찾기 수가 가장 많은 식당의 음식 종류, ID, 식당 이름, 즐겨찾기수 출력!!
+SELECT FOOD_TYPE, REST_ID, REST_NAME, FAVORITES
+FROM REST_INFO
+WHERE FAVORITES IN (SELECT MAX(FAVORITES) FROM REST_INFO GROUP BY FOOD_TYPE)
+GROUP BY FOOD_TYPE  -- 한 번 더 그룹화 필요
+ORDER BY FOOD_TYPE DESC
+
+SELECT a.FOOD_TYPE, a.REST_ID, a.REST_NAME, a.FAVORITES
+FROM REST_INFO a JOIN (SELECT FOOD_TYPE, max(FAVORITES) AS max_fav
+                       FROM REST_INFO  
+                       GROUP BY FOOD_TYPE) b
+                 ON a.FOOD_TYPE = b.FOOD_TYPE
+AND a.FAVORITES = b.max_fav 
+ORDER BY FOOD_TYPE desc
+
+-- 조건별로 분류하여 주문상태 출력하기
+SELECT ORDER_ID,PRODUCT_ID,DATE_FORMAT(OUT_DATE,'%Y-%m-%d')OUT_DATE, CASE
+                                                                        WHEN DATE_FORMAT(OUT_DATE,'%m-%d') <= '05-01' THEN '출고완료'
+                                                                        WHEN DATE_FORMAT(OUT_DATE,'%m-%d') > '05-01' THEN '출고대기'
+                                                                        ELSE '출고미정'
+                                                                     END 출고여부
+FROM FOOD_ORDER
+ORDER BY ORDER_ID
+
+-- 헤비 유저가 소유한 장소
+SELECT ID, NAME, HOST_ID
+FROM PLACES
+WHERE HOST_ID IN (SELECT HOST_ID FROM PLACES GROUP BY HOST_ID HAVING COUNT(NAME) >= 2)
+ORDER BY ID
+
+-- 오랜 기간 보호한 동물(1)
+SELECT AI.NAME, AI.DATETIME
+FROM ANIMAL_INS AI LEFT JOIN ANIMAL_OUTS AO ON AI.ANIMAL_ID = AO.ANIMAL_ID
+WHERE AO.DATETIME IS NULL
+ORDER BY DATETIME LIMIT 3
+
+-- 있었는데요 없었습니다.
+SELECT AI.ANIMAL_ID, AI.NAME
+FROM ANIMAL_INS AI, ANIMAL_OUTS AO
+WHERE AI.ANIMAL_ID = AO.ANIMAL_ID AND AI.DATETIME > AO.DATETIME
+ORDER BY AI.DATETIME
+
+-- 없어진 기록 찾기
+SELECT AO.ANIMAL_ID, AO.NAME
+FROM ANIMAL_OUTS AO LEFT JOIN ANIMAL_INS AI ON AO.ANIMAL_ID = AI.ANIMAL_ID
+WHERE AI.ANIMAL_ID IS NULL
