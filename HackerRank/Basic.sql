@@ -82,3 +82,37 @@ SELECT NAME FROM EMPLOYEE ORDER BY NAME;
 Write a query that prints a list of employee names (i.e.: the name attribute) for employees in Employee having a salary greater than $2000  per month who have been employees for less than 10 months. Sort your result by ascending employee_id.
 SELECT NAME FROM EMPLOYEE WHERE SALARY >= 2000 AND MONTHS < 10 ORDER BY EMPLOYEE_ID ASC;
 
+-- Revising Aggregations - The Count Function
+-- 도시의 인구가 100,000명보다 큰 도시의 수를 쿼리
+SELECT COUNT(*)
+FROM CITY
+WHERE POPULATION >= 100000
+
+-- Revising Aggregations - The Sum Function
+-- District가 캘리포니아에 있는 CITY의 모든 도시의 총 인구수를 조회
+SELECT SUM(POPULATION)
+FROM CITY
+WHERE DISTRICT = 'California'
+
+-- Revising Aggregations - Averages
+SELECT AVG(POPULATION)
+FROM CITY
+WHERE DISTRICT = 'CALIFORNIA'
+
+-- Average Population
+-- 도시의 모든 도시에 대한 평균 인구를 가장 가까운 정수로 반올림
+SELECT ROUND(AVG(POPULATION))
+FROM CITY
+
+-- Japan Population
+SELECT SUM(POPULATION)
+FROM CITY
+WHERE COUNTRYCODE = 'JPN'
+
+-- Population Density Difference
+SELECT MAX(POPULATION) - MIN(POPULATION)
+FROM CITY
+
+-- The Blunder
+SELECT CEILING(AVG(SALARY) - AVG(REPLACE(SALARY,0,''))) -- ROUND(AVG(SALARY) - AVG(REPLACE(SALARY,0,'')))+1
+FROM EMPLOYEES
