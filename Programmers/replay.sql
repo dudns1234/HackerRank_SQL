@@ -1,0 +1,115 @@
+# SELECT 문제 풀이
+
+-- 3월에 태어난 여성 회원 목록
+-- 조건 : 생일 = 3월, 성별 = w, 전화번호 =! NULL
+
+SELECT MEMBER_ID, MEMBER_NAME, GENDER, DATE_FORMAT(DATE_OF_BIRTH,"%Y-%m-%d") DATE_OF_BIRTH
+FROM MEMBER_PROFILE
+WHERE TLNO IS NOT NULL AND DATE_FORMAT(DATE_OF_BIRTH,"%m") ='03' AND GENDER = "W"
+ORDER BY MEMBER_ID
+
+DATE_FORMAT(____,'%Y-%m-%d'), IS NOT NULL
+
+-- 재구매가 일어난 상품과 회원 리스트 구하기
+-- 조건 : '동일한 회원'이 '동일한 상품' 재구매 -> COUNT(*) >= 2
+-- 정렬 : 회원ID 오름차순 -> 상품ID 내림차순
+SELECT USER_ID, PRODUCT_ID
+FROM ONLINE_SALE
+GROUP BY USER_ID, PRODUCT_ID
+HAVING COUNT(*) >= 2
+ORDER BY USER_ID, PRODUCT_ID DESC
+
+-- 오프라인/온라인 판매 데이터 통합하기
+-- 조건/정렬
+-- 2022년 3월의 오프라인/온라인 상품 판매
+-- OFFLINE_SALE 테이블의 판매 데이터의 USER_ID 값은 NULL
+-- 판매일 오름차순 -> 상품ID 오름차순 -> 유저ID 오름차순
+--> INNER, LEFT JOIN 아님 UNION ALL 로 써야함.
+SELECT DATE_FORMAT(SALES_DATE,"%Y-%m-%d") SALES_DATE,PRODUCT_ID,USER_ID,SALES_AMOUNT FROM ONLINE_SALE WHERE DATE_FORMAT(SALES_DATE,"%Y-%m") = "2022-03"
+UNION ALL
+SELECT DATE_FORMAT(SALES_DATE,"%Y-%m-%d") SALES_DATE,PRODUCT_ID,NULL USER_ID,SALES_AMOUNT FROM OFFLINE_SALE WHERE DATE_FORMAT(SALES_DATE,"%Y-%m") = "2022-03"
+ORDER BY SALES_DATE,PRODUCT_ID,USER_ID
+
+-- 아픈 동물 찾기
+-- 조건, 정렬: = Sick, 아이디순 오름차순
+SELECT ANIMAL_ID,NAME
+FROM ANIMAL_INS
+WHERE INTAKE_CONDITION = "Sick"
+ORDER BY ANIMAL_ID
+
+-- 어린 동물 찾기
+-- 조건, 정렬: != 'Aged', 아이디순 오름차순
+SELECT ANIMAL_ID,NAME
+FROM ANIMAL_INS
+WHERE INTAKE_CONDITION != 'Aged'
+-- WHERE NOT INTAKE_CONDITION LIKE 'AGED'
+ORDER BY ANIMAL_ID
+
+-- 동물의 아이디와 이름
+-- 조건, 정렬: 모든 동물, ANIMAL_ID 오름차순
+SELECT ANIMAL_ID,NAME
+FROM ANIMAL_INS
+ORDER BY ANIMAL_ID
+
+-- 여러 기준으로 정렬하기
+-- 조건, 정렬: 모든 동물, NAME 오름차순, 보호를 나중에 시작
+SELECT ANIMAL_ID,NAME,DATETIME
+FROM ANIMAL_INS
+ORDER BY NAME, DATETIME DESC
+
+-- 상위 N개 레코드
+-- 조건: 가장 먼저 들어온 동물의 이름
+SELECT NAME
+FROM ANIMAL_INS
+ORDER BY DATETIME LIMIT 1
+
+-- 조건에 맞는 회원수 구하기
+-- 조건: 2021년에 가입, 회원나이 20이상 29이하
+SELECT COUNT(*) USERS
+FROM USER_INFO
+WHERE LEFT(JOINED,4) = '2021' AND AGE >= 20 AND AGE <= 29
+-- WHERE DATE_FORMAT(JOINED,'%Y') = '2021' AND AGE BETWEEN 20 AND 29
+
+-- 가장 큰 물고기 10마리 구하기
+SELECT ID,LENGTH
+FROM FISH_INFO
+ORDER BY LENGTH DESC, ID LIMIT 10
+
+-- 잔챙이 갑은 수 구하기
+-- 조건: 길이가 10cm 이하 = LENGTH 가 NULL 
+SELECT COUNT(*) FISH_COUNT
+FROM FISH_INFO
+WHERE LENGTH IS NULL
+
+-- Python 개발자 찾기
+-- 조건, 정렬: Python 스킬을 가짐, ID 오름차순
+SELECT ID, EMAIL, FIRST_NAME, LAST_NAME
+FROM DEVELOPER_INFOS
+WHERE SKILL_1 = 'Python' OR SKILL_2 = 'Python' OR SKILL_3 = 'Python'
+ORDER BY ID
+
+-- 조건에 맞는 개발자 찾기
+SELECT ID, EMAIL,FIRST_NAME, LAST_NAME
+FROM DEVELOPERS
+WHERE SKILL_CODE & (SELECT sum(CODE)
+                    FROM SKILLCODES
+                    WHERE NAME = 'Python' OR NAME = 'C#')
+                    -- WHERE NAME IN ('Python','C#'))
+ORDER BY ID
+# 비트 단위 논리 연산자 (2진법)
+& : 비트 단위 AND
+| : 비트 단위 OR
+SELECT 1&0; //0으로 출력 
+SELECT 1&1; //1로 출력 
+SELECT 5&7; //5로 출력(101&111=101) 
+SELECT 1|1; //1로 출력 
+SELECT 1|0; //1로 출력 
+SELECT 5|7; // 7로 출력 (101|111=111)
+
+-- 특정 물고기를 잡은 총 수 구하기
+-- 조건: 물고기 이름은 BASS, SNAPPER
+SELECT COUNT(*) FISH_COUNT
+FROM FISH_INFO
+WHERE FISH_TYPE IN (SELECT FISH_TYPE
+                    FROM FISH_NAME_INFO
+                    WHERE FISH_NAME IN ('BASS','SNAPPER'))
